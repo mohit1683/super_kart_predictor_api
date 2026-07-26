@@ -3,7 +3,7 @@ import pandas as pd
 import requests
 
 # Base URL of the Flask backend
-BACKEND_URL = "http://127.0.0.1:7860"
+BACKEND_URL = "http://backend:7860"
 
 # Set the title of the Streamlit app
 st.title("SuperKart Sale Prediction")
@@ -41,7 +41,7 @@ input_data = pd.DataFrame([{
 if st.button("Predict", type="primary"):
     response = requests.post(f"{BACKEND_URL}/v1/prediction", json=input_data.to_dict(orient='records')[0])  # Send data to Flask API
     if response.status_code == 200:
-        prediction = response.json()['Predicted sales']
+        prediction = response.json()['Predicted Sales']
         st.success(f"Predicted Sales: {prediction}")
     else:
         st.error("Unable to connect to the prediction API.")
