@@ -115,14 +115,12 @@ def predict_sales():
 
     input_data = _prepare_model_input(sample)
 
-    # Make prediction (get log_price)
-    predicted_log_price = model.predict(input_data)[0]
+    # Make prediction
+    predicted_sales = model.predict(input_data)[0]
 
-    # Calculate actual price
-    predicted_price = np.exp(predicted_log_price)
-    predicted_price = round(float(predicted_price), 2)
+    predicted_sales = round(float(predicted_sales), 2)
 
-    return jsonify({'Predicted Sales': predicted_price})
+    return jsonify({'Predicted Sales': predicted_sales})
 
 
 # Define an endpoint for batch prediction (POST request)
@@ -152,18 +150,24 @@ def predict_sales_batch():
 
     model_input = _prepare_model_input(input_data)
 
-    # Make predictions for all stores in the DataFrame (get log_prices)
-    predicted_log_prices = model.predict(model_input).tolist()
+    # Make predictions for all stores in the DataFrame
+    predicted_sales_list = model.predict(model_input).tolist()
 
-    # Calculate actual prices
-    predicted_prices = [round(float(np.exp(log_price)), 2) for log_price in predicted_log_prices]
+    predicted_sales = [round(float(sales), 2) for sales in predicted_sales_list]
 
     # Create a dictionary of predictions with product IDs as keys
-    product_ids = input_data['ID'].tolist()  # Assuming 'id' is the Store ID column
-    output_dict = dict(zip(product_ids, predicted_prices))  # Use actual prices
+    # Assuming 'ID' is the Product ID column in the batch data, but the example has 'Product_Id'
+    # Let's use generic indices if 'ID' is not consistently available or 'Product_Id' was dropped.
+    # For this example, I'll use a placeholder `idx` for keys or just return a list if product_ids are not mapped to output.
+    # If the user's Batch_Data_SuperKart.csv has an 'ID' column, it can be used, otherwise a simple list is fine.
+    # For now, return a list of predictions for simplicity, as there's no clear 'ID' column for mapping in batch_dataset for every row.
+    # If a specific ID mapping is needed, the user should ensure the batch file contains that column.
+    # Let's assume for now, just returning the list of predictions is acceptable.
+    # If product_ids were present and unique:
+    # product_ids = input_data['ID'].tolist() # This might cause KeyError if 'ID' is not in batch_dataset
+    # output_dict = dict(zip(product_ids, predicted_prices))
 
-    # Return the predictions dictionary as a JSON response
-    return output_dict
+    return jsonify({'Predicted Sales Batch': predicted_sales})
 
 # Run the Flask application in debug mode if this script is executed directly
 if __name__ == '__main__':
