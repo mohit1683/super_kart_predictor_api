@@ -21,7 +21,7 @@ def home():
 
 # Define an endpoint for single property prediction (POST request)
 @super_kart_predictor_api.post('/v1/prediction')
-def predict_rental_price():
+def predict_sales():
     """
     This function handles POST requests to the '/v1/prediction' endpoint.
     It expects a JSON payload containing payload details and returns
@@ -63,10 +63,10 @@ def predict_rental_price():
 
 
 # Define an endpoint for batch prediction (POST request)
-@super_kart_predictor_api.post('/v1/predictbatch')
-def predict_rental_price_batch():
+@super_kart_predictor_api.post('/v1/predictionbatch')
+def predict_sales_batch():
     """
-    This function handles POST requests to the '/v1/predictbatch' endpoint.
+    This function handles POST requests to the '/v1/predictionbatch' endpoint.
     It expects a CSV file containing store details for multiple stores
     and returns the predicted profit as a dictionary in the JSON response.
     """
@@ -91,4 +91,4 @@ def predict_rental_price_batch():
 
 # Run the Flask application in debug mode if this script is executed directly
 if __name__ == '__main__':
-    super_kart_predictor_api.run(debug=True)
+    super_kart_predictor_api.run(host='0.0.0.0', port=7860, debug=True)
