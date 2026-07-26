@@ -21,7 +21,7 @@ store_type = st.selectbox("Store Type", ["Supermarket Type1", "Supermarket Type2
 product_id_char = st.selectbox("Product Id Character", ["FD", "NC", "DR"])
 store_age_years = st.number_input("Store Age Years", min_value=0, step=1, max_value=1)
 product_type_category = st.selectbox("Product Type Category", ["Non Perishables", "Perishables"])
-storage_size = st.selectbox("Storage Size", ["Small", "Medium", "Large"])
+store_size = st.selectbox("Storage Size", ["Small", "Medium", "Large"])
 
 # Convert user input into a DataFrame
 input_data = pd.DataFrame([{
