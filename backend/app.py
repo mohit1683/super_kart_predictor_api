@@ -34,62 +34,35 @@ except Exception:
     model = None
 
 
-def _build_compat_feature_vector(sample):
-    """Convert the API payload into a 40-feature vector compatible with the
-    serialized RandomForestRegressor model."""
-    numeric_fields = [
-        'Product_Weight',
-        'Product_Allocated_Area',
-        'Product_MRP',
-        'Store_Age_Years',
-    ]
-    categorical_fields = [
-        ('Product_Sugar_Content', ['Low Sugar', 'Regular', 'No Sugar']),
-        ('Store_Location_City_Type', ['Tier 1', 'Tier 2', 'Tier 3']),
-        ('Store_Type', ['Supermarket Type1', 'Supermarket Type2', 'Departmental Store', 'Food Mart']),
-        ('Product_Id_char', ['FD', 'NC', 'DR']),
-        ('Product_Type_Category', ['Non Perishables', 'Perishables']),
-        ('Store_Size', ['Small', 'Medium', 'Large']),
-    ]
-
-    features = []
-    for field in numeric_fields:
-        value = sample.get(field, 0)
-        features.append(float(value))
-
-    for field_name, categories in categorical_fields:
-        raw_value = str(sample.get(field_name, ''))
-        one_hot = []
-        for category in categories:
-            one_hot.append(1.0 if raw_value == category else 0.0)
-        # Pad each categorical field to a fixed width of six columns so the
-        # serialized model sees the expected 40-feature matrix shape.
-        while len(one_hot) < 6:
-            one_hot.append(0.0)
-        features.extend(one_hot)
-
-    if len(features) != 40:
-        # Fallback to a padded vector if the shape is not exactly 40.
-        features = features[:40] + [0.0] * max(0, 40 - len(features))
-
-    return np.array(features, dtype=float)
+EXPECTED_FEATURE_COLUMNS = [
+    'Product_Weight',
+    'Product_Sugar_Content',
+    'Product_Allocated_Area',
+    'Product_MRP',
+    'Store_Size',
+    'Store_Location_City_Type',
+    'Store_Type',
+    'Product_Id_char',
+    'Store_Age_Years',
+    'Product_Type_Category',
+]
 
 
 def _prepare_model_input(data):
     if isinstance(data, pd.DataFrame):
-        rows = data.to_dict(orient='records')
+        df = data.copy()
     elif isinstance(data, list):
-        rows = data
+        df = pd.DataFrame(data)
+    elif isinstance(data, dict):
+        df = pd.DataFrame([data])
     else:
-        rows = [data]
+        raise ValueError("Unsupported input type for prediction")
 
-    feature_matrix = []
-    for row in rows:
-        if hasattr(row, 'to_dict'):
-            row = row.to_dict()
-        feature_matrix.append(_build_compat_feature_vector(row))
+    for column in EXPECTED_FEATURE_COLUMNS:
+        if column not in df.columns:
+            df[column] = np.nan
 
-    return np.array(feature_matrix, dtype=float)
+    return df[EXPECTED_FEATURE_COLUMNS]
 
 
 # Define a route for the home page (GET request)
@@ -147,13 +120,8 @@ def predict_sales():
 
     # Calculate actual price
     predicted_price = np.exp(predicted_log_price)
-
-    # Convert predicted_price to Python float
     predicted_price = round(float(predicted_price), 2)
-    # The conversion above is needed as we convert the model prediction (log price) to actual price using np.exp, which returns predictions as NumPy float32 values.
-    # When we send this value directly within a JSON response, Flask's jsonify function encounters a datatype error
 
-    # Return the actual price
     return jsonify({'Predicted Sales': predicted_price})
 
 
