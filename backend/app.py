@@ -17,23 +17,24 @@ MODEL_PATH = BASE_DIR / "super_kart_prediction_model_v1_0.joblib"
 # for health checks and basic validation when the model file is missing.
 model = None
 
-
+#Defining function to load the model
 def load_model():
     global model
     if model is not None:
         return model
+    #Checking if model path exist or not    
     if not MODEL_PATH.exists():
-        raise FileNotFoundError(f"Model file not found: {MODEL_PATH}")
-    model = joblib.load(MODEL_PATH)
+        raise FileNotFoundError(f"Model file not found: {MODEL_PATH}")#Raising exception model path is not available
+    model = joblib.load(MODEL_PATH)#Loading model from model path and saving in model variable
     return model
 
-
+#Calling load_model() function to load the model
 try:
     load_model()
-except Exception:
-    model = None
+except Exception: #raising exception is model is not loaded properly
+    model = None 
 
-
+#Defining list of expected feature columns
 EXPECTED_FEATURE_COLUMNS = [
     'Product_Weight',
     'Product_Sugar_Content',
@@ -47,14 +48,14 @@ EXPECTED_FEATURE_COLUMNS = [
     'Product_Type_Category',
 ]
 
-
+#Defining function to load data from various sources
 def _prepare_model_input(data):
-    if isinstance(data, pd.DataFrame):
+    if isinstance(data, pd.DataFrame):#Loading data if it's available as data frame
         df = data.copy()
-    elif isinstance(data, list):
-        df = pd.DataFrame(data)
-    elif isinstance(data, dict):
+    elif isinstance(data, dict):#Loading data if it's available as dictionary
         df = pd.DataFrame([data])
+    elif isinstance(data, list):#Loading data if it's available as list
+        df = pd.DataFrame(data)
     else:
         raise ValueError("Unsupported input type for prediction")
 
@@ -154,18 +155,6 @@ def predict_sales_batch():
     predicted_sales_list = model.predict(model_input).tolist()
 
     predicted_sales = [round(float(sales), 2) for sales in predicted_sales_list]
-
-    # Create a dictionary of predictions with product IDs as keys
-    # Assuming 'ID' is the Product ID column in the batch data, but the example has 'Product_Id'
-    # Let's use generic indices if 'ID' is not consistently available or 'Product_Id' was dropped.
-    # For this example, I'll use a placeholder `idx` for keys or just return a list if product_ids are not mapped to output.
-    # If the user's Batch_Data_SuperKart.csv has an 'ID' column, it can be used, otherwise a simple list is fine.
-    # For now, return a list of predictions for simplicity, as there's no clear 'ID' column for mapping in batch_dataset for every row.
-    # If a specific ID mapping is needed, the user should ensure the batch file contains that column.
-    # Let's assume for now, just returning the list of predictions is acceptable.
-    # If product_ids were present and unique:
-    # product_ids = input_data['ID'].tolist() # This might cause KeyError if 'ID' is not in batch_dataset
-    # output_dict = dict(zip(product_ids, predicted_prices))
 
     return jsonify({'Predicted Sales Batch': predicted_sales})
 
