@@ -19,7 +19,7 @@ product_mrp = st.number_input("Product MRP", min_value=1, max_value=300)
 store_location_city_type = st.selectbox("Store Location City Type", ["Tier 1", "Tier 2", "Tier 3"])
 store_type = st.selectbox("Store Type", ["Supermarket Type1", "Supermarket Type2", "Departmental Store","Food Mart"])
 product_id_char = st.selectbox("Product Id Character", ["FD", "NC", "DR"])
-store_age_years = st.number_input("Store Age Years", min_value=0, step=1, max_value=1)
+store_age_years = st.number_input("Store Age Years", min_value=0, step=1, max_value=100)
 product_type_category = st.selectbox("Product Type Category", ["Non Perishables", "Perishables"])
 store_size = st.selectbox("Storage Size", ["Small", "Medium", "Large"])
 
